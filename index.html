@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda Cultural de Terrassa</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: #f7f6f2; color: #333; margin: 0; padding: 24px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; margin-bottom: 4px; color: #1a1a1a; }
+    .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 24px; }
+    
+    .filters-top { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+    .filters-dates { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; align-items: center; }
+    .date-group { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #555; font-weight: 500; }
+    
+    .search-input { flex: 2; min-width: 220px; padding: 10px 16px; border: 1px solid #dcdcdc; border-radius: 8px; font-size: 0.95rem; background: #fff; outline: none; }
+    .select-filter, .date-filter { flex: 1; min-width: 150px; padding: 10px 14px; border: 1px solid #dcdcdc; border-radius: 8px; font-size: 0.95rem; background: #fff; outline: none; cursor: pointer; }
+
+    .btn-clear { padding: 10px 16px; background: #e0e0e0; color: #333; border: 1px solid #d0d0d0; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-clear:hover { background: #d0d0d0; }
+
+    .filters-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .chip { padding: 8px 18px; border: 1px solid #dcdcdc; border-radius: 20px; background: #fff; font-size: 0.9rem; cursor: pointer; color: #444; transition: all 0.2s; }
+    .chip.active { background: #2b2b2b; color: #fff; border-color: #2b2b2b; }
+
+    .counter { font-size: 0.95rem; color: #444; margin-bottom: 20px; font-weight: 600; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .card { background: #fff; border-radius: 12px; padding: 18px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
+    .card-tag { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #888; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #111; margin: 0 0 10px 0; line-height: 1.3; }
+    .card-info { font-size: 0.9rem; color: #555; margin-bottom: 6px; }
+    
+    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+    .badge-price { padding: 4px 10px; background: #f0f0f0; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: #333; }
+    .btn-link { font-size: 0.85rem; font-weight: 600; color: #0066cc; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+    .btn-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Agenda Cultural de Terrassa</h1>
+    <div class="subtitle">Programación de Terrassa Arts Escèniques, La Factoria Cultural y Festival TNT</div>
+
+    <!-- FILTROS PRINCIPALES -->
+    <div class="filters-top">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar por título, espacio...">
+      
+      <select id="categorySelect" class="select-filter">
+        <option value="">Todas las categorías</option>
+        <option value="Teatre">Teatre / Teatro</option>
+        <option value="Dansa">Dansa / Danza</option>
+        <option value="Música">Música / Concerts</option>
+        <option value="Familiar">Familiar / Kids</option>
+        <option value="Monòlegs">Monòlegs / Comedia</option>
+        <option value="Circ">Circ / Circo</option>
+        <option value="Òpera">Òpera</option>
+        <option value="Carrer">Carrer / Plazas</option>
+        <option value="Performance">Performance / Instalación</option>
+      </select>
+
+      <select id="monthSelect" class="select-filter">
+        <option value="">Todos los meses</option>
+        <option value="-09-">Septiembre 2026</option>
+        <option value="-10-">Octubre 2026</option>
+        <option value="-11-">Noviembre 2026</option>
+        <option value="-12-">Diciembre 2026</option>
+        <option value="-01-">Enero 2027</option>
+        <option value="-02-">Febrero 2027</option>
+        <option value="-03-">Marzo 2027</option>
+        <option value="-04-">Abril 2027</option>
+        <option value="-05-">Mayo 2027</option>
+        <option value="-06-">Junio 2027</option>
+      </select>
+
+      <select id="sortSelect" class="select-filter">
+        <option value="asc">Fecha: próxima primero</option>
+        <option value="desc">Fecha: más lejana primero</option>
+      </select>
+    </div>
+
+    <!-- FILTROS DE FECHAS Y BOTÓN DE BORRAR -->
+    <div class="filters-dates">
+      <div class="date-group">
+        <span>Fecha exacta:</span>
+        <input type="date" id="dateInput" class="date-filter">
+      </div>
+      <div class="date-group">
+        <span>Desde:</span>
+        <input type="date" id="startDateInput" class="date-filter">
+      </div>
+      <div class="date-group">
+        <span>Hasta:</span>
+        <input type="date" id="endDateInput" class="date-filter">
+      </div>
+      <button class="btn-clear" onclick="clearAllFilters()">🧹 Limpiar filtros</button>
+    </div>
+
+    <div class="filters-chips">
+      <button class="chip active" onclick="setOrganizador('')">Todas</button>
+      <button class="chip" onclick="setOrganizador('Terrassa Arts Escèniques')">Terrassa Arts Escèniques</button>
+      <button class="chip" onclick="setOrganizador('La Factoria Cultural')">La Factoria Cultural</button>
+      <button class="chip" onclick="setOrganizador('Festival TNT')">Festival TNT</button>
+    </div>
+
+    <div class="counter" id="activityCounter">Cargando actividades...</div>
+
+    <div class="grid" id="eventsGrid"></div>
+  </div>
+
+  <script>
+    const allData = [
+      {"fecha": "2026-09-19", "dia": "Sábado", "hora": "19h", "actividad": "L'últim àtom", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "30€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/lultim-atom/"},
+      {"fecha": "2026-09-19", "dia": "Sábado", "hora": "20h", "actividad": "Giselle", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "28-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/giselle/"},
+      {"fecha": "2026-09-24", "dia": "Jueves", "hora": "18h", "actividad": "(cau)", "lugar": "Escenario - Teatre Principal", "categoria": "TNT - Danza", "precio": "15€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/cau/"},
+      {"fecha": "2026-09-24", "dia": "Jueves", "hora": "18:30h", "actividad": "GRANOTES AL CEL, AIGUA A LA TERRA", "lugar": "Plaça Can Roca", "categoria": "TNT en las plazas", "precio": "Gratuito", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/granotes-al-cel-aigua-a-la-terra/"},
+      {"fecha": "2026-09-24", "dia": "Jueves", "hora": "19:30h", "actividad": "EVERAFTER", "lugar": "Tub d'Assaig 7'70", "categoria": "TNT - Danza", "precio": "15€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/everafter/"},
+      {"fecha": "2026-09-24", "dia": "Jueves", "hora": "21:30h", "actividad": "ANGELICAL", "lugar": "Teatre Alegria", "categoria": "TNT - Danza/Performance", "precio": "15€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/angelical/"},
+      {"fecha": "2026-09-25", "dia": "Viernes", "hora": "16:30h i 19h", "actividad": "EL DISCURSO", "lugar": "Escenario - Teatre Principal", "categoria": "TNT - Performance", "precio": "15€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/el-discurso/"},
+      {"fecha": "2026-09-25", "dia": "Viernes", "hora": "17h", "actividad": "LA PRESÈNCIA", "lugar": "El Corralito CCA", "categoria": "TNT - Performance", "precio": "4€ (agotadas)", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/la-presencia/"},
+      {"fecha": "2026-09-25", "dia": "Viernes", "hora": "18h", "actividad": "OXÍMORON", "lugar": "Plaza de la Cultura", "categoria": "TNT en las plazas", "precio": "Gratuito", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/oximoron/"},
+      {"fecha": "2026-09-25", "dia": "Viernes", "hora": "18h", "actividad": "TARANTO ALEATORIO", "lugar": "Casa Alegre de Sagrera", "categoria": "TNT - Flamenco", "precio": "Gratuito", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/taranto-aleatorio/"},
+      {"fecha": "2026-09-25", "dia": "Viernes", "hora": "19h", "actividad": "GRANOTES AL CEL, AIGUA A LA TERRA", "lugar": "Plaça Vella", "categoria": "TNT en las plazas", "precio": "Gratuito", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/granotes-al-cel-aigua-a-la-terra/"},
+      {"fecha": "2026-09-25", "dia": "Viernes", "hora": "19h", "actividad": "LA VÍA LÁCTEA (Pre-estreno)", "lugar": "El Vapor de Prodis", "categoria": "TNT - Performance", "precio": "Gratuito", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/la-via-lactea/"},
+      {"fecha": "2026-09-25", "dia": "Viernes", "hora": "20h", "actividad": "Danses hongareses de Brahms", "lugar": "La Factoria Cultural", "categoria": "Música", "precio": "12-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/danses-hongareses-de-brahms/"},
+      {"fecha": "2026-09-25", "dia": "Viernes", "hora": "20:30h-23:30h", "actividad": "LA LUZ DEL LOBO NO PESA", "lugar": "Parc de Vallparadís", "categoria": "TNT - Instalación", "precio": "Gratuito", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/la-luz-del-lobo-no-pesa/"},
+      {"fecha": "2026-09-25", "dia": "Viernes", "hora": "20:45h", "actividad": "IMPOSSIBLE IMAGINAR RES", "lugar": "Teatre Alegria", "categoria": "TNT - Teatro", "precio": "15€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/impossible-imaginar-res/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "12h/12:45h/16h/16:45h", "actividad": "EL LABERINTO SE MUEVE", "lugar": "El Vapor de Prodis", "categoria": "TNT Kids", "precio": "6,50€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/el-laberinto-se-mueve/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "12h", "actividad": "PETI-SUIS", "lugar": "El Corralito CCA", "categoria": "TNT - Danza", "precio": "4€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/peti-suis/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "12h", "actividad": "(cau)", "lugar": "Escenario - Teatre Principal", "categoria": "TNT - Danza", "precio": "15€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/cau/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "13h", "actividad": "KMS OF RESISTANCE", "lugar": "Masia Freixa", "categoria": "TNT - Danza", "precio": "Gratuito", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/kms-of-resistance/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "17h", "actividad": "VOLVAMOS AL BAILE", "lugar": "Casa de la Música", "categoria": "TNT - Danza", "precio": "11€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/volvamos-al-baile/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "18h", "actividad": "OXÍMORON", "lugar": "Plaza del Vapor Ventalló", "categoria": "TNT en las plazas", "precio": "Gratuito", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/oximoron/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "18h", "actividad": "TARANTO ALEATORIO", "lugar": "Plaça de l'Assemblea de Catalunya", "categoria": "TNT - Flamenco", "precio": "Gratuito", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/taranto-aleatorio/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "18h", "actividad": "I WAS TOLD NOT TO MAKE EYE CONTACT WITH TOM CRUISE", "lugar": "ESCAC - Plató 3", "categoria": "TNT - Performance", "precio": "15€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/i-was-told-not-to-make-eye-contact-with-tom-cruise/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "19h", "actividad": "El Pony Menut", "lugar": "La Factoria Cultural", "categoria": "Familiars", "precio": "18€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/el-pony-menut/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "20h", "actividad": "CLAP & SLAP", "lugar": "Teatre Alegria", "categoria": "TNT - Danza", "precio": "15€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/clap-slap/"},
+      {"fecha": "2026-09-26", "dia": "Sábado", "hora": "22h", "actividad": "ZERO", "lugar": "Escenario - Teatre Principal", "categoria": "TNT - Danza", "precio": "15€", "organizador": "Festival TNT", "url": "https://tnt.cat/es/programacio/zero/"},
+      {"fecha": "2026-09-27", "dia": "Domingo", "hora": "18:30h", "actividad": "Mejor no decirlo", "lugar": "La Factoria Cultural", "categoria": "Teatre", "precio": "38€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/mejor-no-decirlo/"},
+      {"fecha": "2026-10-03", "dia": "Sábado", "hora": "16h i 18h (ds.)", "actividad": "Mac, Mec, Mic", "lugar": "Teatre Alegria", "categoria": "Familiar", "precio": "16,50€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/mac-mec-mic-2/"},
+      {"fecha": "2026-10-03", "dia": "Sábado", "hora": "19h", "actividad": "Perfectes desconeguts", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "24€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/perfectes-desconeguts/"},
+      {"fecha": "2026-10-03", "dia": "Sábado", "hora": "20h", "actividad": "Stravinsky", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "24-28€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/stravinsky/"},
+      {"fecha": "2026-10-04", "dia": "Domingo", "hora": "10:00-12:45h", "actividad": "Mac, Mec, Mic", "lugar": "Teatre Alegria", "categoria": "Familiar", "precio": "16,50€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/mac-mec-mic-2/"},
+      {"fecha": "2026-10-04", "dia": "Domingo", "hora": "18h", "actividad": "Tribut a Dire Straits", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "20-29€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/tribut-a-dire-straits/"},
+      {"fecha": "2026-10-09", "dia": "Viernes", "hora": "21h", "actividad": "Ángel Martín (2026)", "lugar": "La Factoria Cultural", "categoria": "Monòlegs", "precio": "24€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/angel-martin/"},
+      {"fecha": "2026-10-10", "dia": "Sábado", "hora": "18h", "actividad": "Sfumato (assajant per la caiguda dels contorns)", "lugar": "Sortida FGC estació Vallparadís", "categoria": "Dansa/Carrer", "precio": "Gratuït", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/sfumato/"},
+      {"fecha": "2026-10-10", "dia": "Sábado", "hora": "20h", "actividad": "Ángel Martín (2026)", "lugar": "La Factoria Cultural", "categoria": "Monòlegs", "precio": "24€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/angel-martin/"},
+      {"fecha": "2026-10-11", "dia": "Domingo", "hora": "18h", "actividad": "El gran show del Rey León", "lugar": "La Factoria Cultural", "categoria": "Familiars", "precio": "22-25€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/el-gran-show-del-rey-leon/"},
+      {"fecha": "2026-10-11", "dia": "Domingo", "hora": "19h", "actividad": "La brama del cérvol", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "32€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/la-brama-del-cervol/"},
+      {"fecha": "2026-10-17", "dia": "Sábado", "hora": "20h", "actividad": "Dancing Beethoven (2026)", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "15-25€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/dancing-beethoven/"},
+      {"fecha": "2026-10-18", "dia": "Domingo", "hora": "18h", "actividad": "Pensionistas", "lugar": "La Factoria Cultural", "categoria": "Teatre", "precio": "22€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/pensionistas/"},
+      {"fecha": "2026-10-19", "dia": "Lunes", "hora": "18h", "actividad": "NODI (de gossos i malditos)", "lugar": "Teatre Alegria", "categoria": "Dansa", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/nodi/"},
+      {"fecha": "2026-10-23", "dia": "Viernes", "hora": "21h", "actividad": "Tribut a Sabina", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "35€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/tribut-a-sabina/"},
+      {"fecha": "2026-10-24", "dia": "Sábado", "hora": "20h", "actividad": "Fórmula V", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "42€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/formula-v/"},
+      {"fecha": "2026-10-25", "dia": "Domingo", "hora": "18h", "actividad": "Operetta", "lugar": "Teatre Principal", "categoria": "Música/Teatre", "precio": "24€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/operetta/"},
+      {"fecha": "2026-10-25", "dia": "Domingo", "hora": "18h", "actividad": "Yo sólo quiero irme a Francia", "lugar": "La Factoria Cultural", "categoria": "Teatre", "precio": "36€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/yo-solo-quiero-irme-a-francia/"},
+      {"fecha": "2026-10-26", "dia": "Lunes", "hora": "18h", "actividad": "Gola", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "24€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/gola/"},
+      {"fecha": "2026-10-30", "dia": "Viernes", "hora": "21h", "actividad": "Misery", "lugar": "La Factoria Cultural", "categoria": "Teatre", "precio": "30€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/misery/"},
+      {"fecha": "2026-10-31", "dia": "Sábado", "hora": "20:30h", "actividad": "Joan Pera, L'Auca del senyor Pera", "lugar": "La Factoria Cultural", "categoria": "Programació LaFACT", "precio": "27€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/es/programacio/joan-pera-lauca-del-senyor-pera/"},
+      {"fecha": "2026-11-01", "dia": "Domingo", "hora": "18h", "actividad": "Psicosi", "lugar": "La Factoria Cultural", "categoria": "Música", "precio": "12-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/psicosi/"},
+      {"fecha": "2026-11-07", "dia": "Sábado", "hora": "19h", "actividad": "Ballarines de peus plans", "lugar": "Espai Escenari Teatre Principal", "categoria": "Dansa", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/ballarines-de-peus-plans/"},
+      {"fecha": "2026-11-07", "dia": "Sábado", "hora": "20h", "actividad": "Ballet Nacional de España", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "18-38€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/ballet-nacional-de-espana/"},
+      {"fecha": "2026-11-08", "dia": "Domingo", "hora": "18h", "actividad": "Ballet Nacional de España", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "18-38€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/ballet-nacional-de-espana/"},
+      {"fecha": "2026-11-08", "dia": "Domingo", "hora": "19h", "actividad": "L'èxit d'un fracassat", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/lexit-dun-fracassat/"},
+      {"fecha": "2026-11-09", "dia": "Lunes", "hora": "18h", "actividad": "L'èxit d'un fracassat", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/lexit-dun-fracassat/"},
+      {"fecha": "2026-11-13", "dia": "Viernes", "hora": "18h", "actividad": "Ara Malikian", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "50-58€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/ara-malikian/"},
+      {"fecha": "2026-11-13", "dia": "Viernes", "hora": "19h", "actividad": "Black Man Solo", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/black-man-solo/"},
+      {"fecha": "2026-11-13", "dia": "Viernes", "hora": "21h", "actividad": "Ara Malikian", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "50-58€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/ara-malikian/"},
+      {"fecha": "2026-11-14", "dia": "Sábado", "hora": "19h", "actividad": "Dones valentes", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "30€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/dones-valentes/"},
+      {"fecha": "2026-11-14", "dia": "Sábado", "hora": "19h", "actividad": "Boja", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/boja/"},
+      {"fecha": "2026-11-14", "dia": "Sábado", "hora": "20h", "actividad": "Tribut a Raffaella Carrà", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "25-28€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/tribut-a-raffaella-carra/"},
+      {"fecha": "2026-11-15", "dia": "Domingo", "hora": "18h", "actividad": "Gromic", "lugar": "La Factoria Cultural", "categoria": "Familiars", "precio": "12€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/gromic/"},
+      {"fecha": "2026-11-19", "dia": "Jueves", "hora": "21h", "actividad": "David Suárez", "lugar": "La Factoria Cultural", "categoria": "Monòlegs", "precio": "21€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/david-suarez/"},
+      {"fecha": "2026-11-21", "dia": "Sábado", "hora": "20h", "actividad": "Gala d'Estrelles English National Ballet", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "38€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/gala-destrelles-de-lenglish-national-ballet/"},
+      {"fecha": "2026-11-22", "dia": "Domingo", "hora": "18h", "actividad": "Gala d'Estrelles English National Ballet", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "38€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/gala-destrelles-de-lenglish-national-ballet/"},
+      {"fecha": "2026-11-22", "dia": "Domingo", "hora": "19h", "actividad": "Dones lliures", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/dones-lliures/"},
+      {"fecha": "2026-11-26", "dia": "Jueves", "hora": "17:30h", "actividad": "Aleta", "lugar": "Cal Reig", "categoria": "Dansa", "precio": "Gratuït", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/aleta/"},
+      {"fecha": "2026-11-26", "dia": "Jueves", "hora": "19h", "actividad": "Fandango Reloaded", "lugar": "Teatre Alegria", "categoria": "Dansa", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/fandango-reloaded/"},
+      {"fecha": "2026-11-26", "dia": "Jueves", "hora": "20:45h", "actividad": "Natural order of things", "lugar": "Teatre Principal", "categoria": "Dansa", "precio": "24€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/natural-order-of-things/"},
+      {"fecha": "2026-11-27", "dia": "Viernes", "hora": "18:45h", "actividad": "Perdón", "lugar": "Teatre Alegria", "categoria": "Dansa", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/perdon/"},
+      {"fecha": "2026-11-27", "dia": "Viernes", "hora": "20:45h", "actividad": "Void", "lugar": "Teatre Principal", "categoria": "Dansa", "precio": "24€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/void/"},
+      {"fecha": "2026-11-27", "dia": "Viernes", "hora": "21h", "actividad": "Tribut a Coldplay", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "20-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/tribut-a-coldplay/"},
+      {"fecha": "2026-11-28", "dia": "Sábado", "hora": "19h", "actividad": "Rel i grapa", "lugar": "Teatre Alegria", "categoria": "Dansa", "precio": "11€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/rel-i-grapa/"},
+      {"fecha": "2026-11-28", "dia": "Sábado", "hora": "20h", "actividad": "La dansa del sabre", "lugar": "La Factoria Cultural", "categoria": "Música", "precio": "12-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/la-dansa-del-sabre/"},
+      {"fecha": "2026-11-28", "dia": "Sábado", "hora": "20:45h", "actividad": "Cèl·lula #6: Faula", "lugar": "Teatre Principal", "categoria": "Dansa", "precio": "18€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/cellula-6-faula/"},
+      {"fecha": "2026-11-29", "dia": "Domingo", "hora": "17h", "actividad": "Llach - Gener 76 · homenatge", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "35-38€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/llach-gener-76/"},
+      {"fecha": "2026-11-29", "dia": "Domingo", "hora": "20h", "actividad": "Llach - Gener 76 · homenatge", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "35-38€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/llach-gener-76/"},
+      {"fecha": "2026-12-03", "dia": "Jueves", "hora": "20h", "actividad": "Una idea genial", "lugar": "La Factoria Cultural", "categoria": "Programació LaFACT", "precio": "24€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/una-idea-genial/"},
+      {"fecha": "2026-12-05", "dia": "Sábado", "hora": "18h", "actividad": "Disney a la luz de las velas", "lugar": "La Factoria Cultural", "categoria": "Familiars", "precio": "20€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/disney-a-la-luz-de-las-velas/"},
+      {"fecha": "2026-12-11", "dia": "Viernes", "hora": "20h", "actividad": "Madama Butterfly", "lugar": "Teatre Principal", "categoria": "Òpera", "precio": "des de 39€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/madama-butterfly/"},
+      {"fecha": "2026-12-12", "dia": "Sábado", "hora": "18h", "actividad": "El Trencanous", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "12-15€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/el-trencanous/"},
+      {"fecha": "2026-12-13", "dia": "Domingo", "hora": "12h", "actividad": "El Trencanous", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "12-15€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/el-trencanous/"},
+      {"fecha": "2026-12-13", "dia": "Domingo", "hora": "18h", "actividad": "Madama Butterfly", "lugar": "Teatre Principal", "categoria": "Òpera", "precio": "des de 39€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/madama-butterfly/"},
+      {"fecha": "2026-12-13", "dia": "Domingo", "hora": "18h", "actividad": "El Trencanous", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "12-15€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/el-trencanous/"},
+      {"fecha": "2026-12-20", "dia": "Domingo", "hora": "19h", "actividad": "Entre el cel i la terra", "lugar": "Teatre Principal", "categoria": "Familiar", "precio": "13,50€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/entre-el-cel-i-la-terra/"},
+      {"fecha": "2026-12-21", "dia": "Lunes", "hora": "18h", "actividad": "Entre el cel i la terra", "lugar": "Teatre Principal", "categoria": "Familiar", "precio": "13,50€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/entre-el-cel-i-la-terra/"},
+      {"fecha": "2026-12-26", "dia": "Sábado", "hora": "21h", "actividad": "Festival de valsos i danses", "lugar": "La Factoria Cultural", "categoria": "Música", "precio": "12-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/festival-de-valsos-i-danses/"},
+      {"fecha": "2026-12-27", "dia": "Domingo", "hora": "17h", "actividad": "Xiula", "lugar": "La Factoria Cultural", "categoria": "Familiars", "precio": "16-19€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/xiula/"},
+      {"fecha": "2026-12-28", "dia": "Lunes", "hora": "21h", "actividad": "SAU, un concert de pel·lícula", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "35-38€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/sau-un-concert-de-pellicula/"},
+      {"fecha": "2026-12-29", "dia": "Martes", "hora": "21h", "actividad": "Soulful Christmas", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "20-29€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/soulful-christmas/"},
+      {"fecha": "2026-12-30", "dia": "Miércoles", "hora": "18h", "actividad": "Pando el mago", "lugar": "La Factoria Cultural", "categoria": "Familiars", "precio": "25€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/pando-el-mago/"},
+      {"fecha": "2027-01-07", "dia": "Jueves", "hora": "18h", "actividad": "20è Circ de l'Any", "lugar": "La Factoria Cultural", "categoria": "Circ", "precio": "12€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/20e-circ-de-lany/"},
+      {"fecha": "2027-01-10", "dia": "Domingo", "hora": "12h", "actividad": "Beatles for kids", "lugar": "La Factoria Cultural", "categoria": "Familiars", "precio": "13-18€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/beatles-for-kids/"},
+      {"fecha": "2027-01-10", "dia": "Domingo", "hora": "19h", "actividad": "Tribut a The Beatles", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "28-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/tribut-a-the-beatles/"},
+      {"fecha": "2027-01-15", "dia": "Viernes", "hora": "21h", "actividad": "Il piccolo elisir d'amore", "lugar": "La Factoria Cultural", "categoria": "Musicals, concerts i tributs", "precio": "10-26€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/il-piccolo-elisir-damore/"},
+      {"fecha": "2027-01-16", "dia": "Sábado", "hora": "20h", "actividad": "La bella dorment (2027)", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "28-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/la-bella-dorment/"},
+      {"fecha": "2027-01-17", "dia": "Domingo", "hora": "18h", "actividad": "La bella dorment (2027)", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "28-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/la-bella-dorment/"},
+      {"fecha": "2027-01-18", "dia": "Lunes", "hora": "18h", "actividad": "La Cordero i el seu exèrcit", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "18€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/la-cordero-i-el-seu-exercit/"},
+      {"fecha": "2027-01-18", "dia": "Lunes", "hora": "19h", "actividad": "36+1", "lugar": "Espai Escenari Teatre Principal", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/36-1/"},
+      {"fecha": "2027-01-22", "dia": "Viernes", "hora": "20h", "actividad": "Pop-rock simfònic", "lugar": "La Factoria Cultural", "categoria": "Música", "precio": "12-32€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/pop-rock-simfonic/"},
+      {"fecha": "2027-01-25", "dia": "Lunes", "hora": "18h", "actividad": "Ai! La misèria ens farà feliços", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "30€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/ai-la-miseria-ens-fara-felicos/"},
+      {"fecha": "2027-01-30", "dia": "Sábado", "hora": "19h", "actividad": "La idea d'Europa", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/la-idea-deuropa/"},
+      {"fecha": "2027-01-30", "dia": "Sábado", "hora": "20h", "actividad": "Compañía Nacho Duato", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "15-28€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/compania-nacho-duato/"},
+      {"fecha": "2027-01-31", "dia": "Domingo", "hora": "18h", "actividad": "Compañía Nacho Duato", "lugar": "La Factoria Cultural", "categoria": "Dansa", "precio": "15-28€", "organizador": "La Factoria Cultural", "url": "https://www.lafactcultural.cat/programacio/compania-nacho-duato/"},
+      {"fecha": "2027-02-07", "dia": "Domingo", "hora": "19h", "actividad": "Conhort", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/conhort/"},
+      {"fecha": "2027-02-08", "dia": "Lunes", "hora": "12h", "actividad": "Solo", "lugar": "Teatre Alegria", "categoria": "Familiar", "precio": "6,50€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/solo/"},
+      {"fecha": "2027-02-08", "dia": "Lunes", "hora": "21h", "actividad": "Tarta Relena", "lugar": "Teatre Principal", "categoria": "Música", "precio": "18€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/tarta-relena/"},
+      {"fecha": "2027-02-15", "dia": "Lunes", "hora": "19h", "actividad": "Tots ocells", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "32€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/tots-ocells/"},
+      {"fecha": "2027-02-16", "dia": "Martes", "hora": "18h", "actividad": "Tots ocells", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "32€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/tots-ocells/"},
+      {"fecha": "2027-02-22", "dia": "Lunes", "hora": "19h", "actividad": "Només les flors", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/nomes-les-flors/"},
+      {"fecha": "2027-02-27", "dia": "Sábado", "hora": "19h", "actividad": "El día del Watusi", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "30€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/el-dia-del-watusi/"},
+      {"fecha": "2027-03-01", "dia": "Lunes", "hora": "11:30h", "actividad": "La biblioteca de la curiositat infinita", "lugar": "Teatre Alegria", "categoria": "Familiar", "precio": "11€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/la-biblioteca-de-la-curiositat-infinita/"},
+      {"fecha": "2027-03-01", "dia": "Lunes", "hora": "21h", "actividad": "Anna Andreu", "lugar": "Teatre Alegria", "categoria": "Música", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/anna-andreu/"},
+      {"fecha": "2027-03-13", "dia": "Sábado", "hora": "19h", "actividad": "Manifest Mangione", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/manifest-mangione/"},
+      {"fecha": "2027-03-15", "dia": "Lunes", "hora": "11h", "actividad": "Àgores", "lugar": "De Plaça Vella a Parc de Vallparadís", "categoria": "Circ/Carrer", "precio": "Gratuït", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/agores/"},
+      {"fecha": "2027-03-15", "dia": "Lunes", "hora": "19h", "actividad": "Mariana", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "18€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/mariana/"},
+      {"fecha": "2027-03-16", "dia": "Martes", "hora": "12h", "actividad": "Plata", "lugar": "Plaça Vella", "categoria": "Carrer", "precio": "Gratuït", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/plata/"},
+      {"fecha": "2027-03-20", "dia": "Sábado", "hora": "19h", "actividad": "La corona d'espines", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "30€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/la-corona-despines/"},
+      {"fecha": "2027-03-22", "dia": "Lunes", "hora": "18h", "actividad": "Lake Machine", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "18€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/lake-machine/"},
+      {"fecha": "2027-03-22", "dia": "Lunes", "hora": "19h", "actividad": "Entrevista con mi hija Mari", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "24€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/entrevista-con-mi-hija-mari/"},
+      {"fecha": "2027-03-28", "dia": "Domingo", "hora": "19h", "actividad": "Roméo & Carmen", "lugar": "Teatre Principal", "categoria": "Dansa", "precio": "Gratuït", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/romeo-carmen/"},
+      {"fecha": "2027-03-28", "dia": "Domingo", "hora": "21h", "actividad": "LaBlackie + Greta", "lugar": "Teatre Alegria", "categoria": "Música", "precio": "18€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/lablackie-greta/"},
+      {"fecha": "2027-03-29", "dia": "Lunes", "hora": "18h", "actividad": "Carrer 024", "lugar": "Plaça Nova", "categoria": "Carrer", "precio": "Gratuït", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/carrer-024/"},
+      {"fecha": "2027-03-30", "dia": "Martes", "hora": "18h", "actividad": "Folk As Queer", "lugar": "Teatre Alegria", "categoria": "Música", "precio": "18€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/folk-as-queer/"},
+      {"fecha": "2027-04-04", "dia": "Domingo", "hora": "19h", "actividad": "Magalí Datzira", "lugar": "Espai Escenari Teatre Principal", "categoria": "Música", "precio": "11€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/magali-datzira/"},
+      {"fecha": "2027-04-05", "dia": "Lunes", "hora": "19h i 21:30h", "actividad": "Un matrimoni de Boston", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "30€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/un-matrimoni-de-boston/"},
+      {"fecha": "2027-04-06", "dia": "Martes", "hora": "12h", "actividad": "Bebesol", "lugar": "Teatre Alegria", "categoria": "Familiar", "precio": "9€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/bebesol/"},
+      {"fecha": "2027-04-10", "dia": "Sábado", "hora": "19h", "actividad": "POP", "lugar": "Teatre Principal - Espai Escenari", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/pop/"},
+      {"fecha": "2027-04-12", "dia": "Lunes", "hora": "18h", "actividad": "La memòria del gel", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/la-memoria-del-gel/"},
+      {"fecha": "2027-04-17", "dia": "Sábado", "hora": "19h", "actividad": "Au Rora", "lugar": "Teatre Principal - Espai Escenari", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/au-rora/"},
+      {"fecha": "2027-04-18", "dia": "Domingo", "hora": "19h", "actividad": "You Are Not a Ghost (YANAG)", "lugar": "Teatre Alegria", "categoria": "Dansa", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/you-are-not-a-ghost-yanag/"},
+      {"fecha": "2027-04-19", "dia": "Lunes", "hora": "17h", "actividad": "Història de la llana", "lugar": "Teatre Alegria", "categoria": "Familiar", "precio": "6,50€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/historia-de-la-llana/"},
+      {"fecha": "2027-04-24", "dia": "Sábado", "hora": "19h", "actividad": "Llogatera", "lugar": "Teatre Principal - Espai Escenari", "categoria": "Teatre", "precio": "15€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/llogatera/"},
+      {"fecha": "2027-04-25", "dia": "Domingo", "hora": "19h", "actividad": "Man mano, il tempo scorre", "lugar": "Espai Escenari Teatre Principal", "categoria": "Dansa", "precio": "11€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/man-mano-il-tempo-scorre/"},
+      {"fecha": "2027-04-25", "dia": "Domingo", "hora": "21h", "actividad": "Baiuca", "lugar": "Teatre Alegria", "categoria": "Música", "precio": "30€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/baiuca/"},
+      {"fecha": "2027-04-26", "dia": "Lunes", "hora": "19h", "actividad": "L'escudellòmetro", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "11€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/lescudellometro/"},
+      {"fecha": "2027-04-27", "dia": "Martes", "hora": "11:15h i 12:30h", "actividad": "Textures", "lugar": "Teatre Alegria", "categoria": "Familiar", "precio": "9€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/textures/"},
+      {"fecha": "2027-05-16", "dia": "Domingo", "hora": "19h", "actividad": "Poncia", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "30€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/poncia/"},
+      {"fecha": "2027-05-18", "dia": "Martes", "hora": "18h", "actividad": "And Here I Am", "lugar": "Espai Escenari Teatre Principal", "categoria": "Dansa", "precio": "11€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/and-here-i-am/"},
+      {"fecha": "2027-05-19", "dia": "Miércoles", "hora": "19h", "actividad": "Molt bé diu, senyor Feliu", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "Gratuït fins completar aforament", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/molt-be-diu-senyor-feliu/"},
+      {"fecha": "2027-05-23", "dia": "Domingo", "hora": "19h", "actividad": "La vida regulinchi", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "18€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/la-vida-regulinchi/"},
+      {"fecha": "2027-05-24", "dia": "Lunes", "hora": "19h", "actividad": "Un déu salvatge", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "30€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/un-deu-salvatge/"},
+      {"fecha": "2027-05-31", "dia": "Lunes", "hora": "18h", "actividad": "Göteborg", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "24€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/goteborg/"},
+      {"fecha": "2027-05-31", "dia": "Lunes", "hora": "19h", "actividad": "Alan", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "24€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/alan/"},
+      {"fecha": "2027-06-07", "dia": "Lunes", "hora": "19h", "actividad": "Els miserables", "lugar": "Teatre Alegria", "categoria": "Teatre", "precio": "18€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/els-miserables/"},
+      {"fecha": "2027-06-14", "dia": "Lunes", "hora": "17h", "actividad": "Dins del cor del món", "lugar": "Teatre Alegria", "categoria": "Familiar", "precio": "9€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/dins-del-cor-del-mon/"},
+      {"fecha": "2027-06-20", "dia": "Domingo", "hora": "19h", "actividad": "La Truita", "lugar": "Teatre Principal", "categoria": "Teatre", "precio": "32€", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/la-truita/"},
+      {"fecha": "2027-06-20", "dia": "Domingo", "hora": "19h", "actividad": "M(otherlands)", "lugar": "Teatre Alegria", "categoria": "Dansa", "precio": "Gratuït (reserva prèvia)", "organizador": "Terrassa Arts Escèniques", "url": "https://terrassaartsesceniques.cat/programacio/m-otherlands/"}
+    ];
+
+    let selectedOrganizador = '';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderEvents();
+      
+      document.getElementById('searchInput').addEventListener('input', renderEvents);
+      document.getElementById('categorySelect').addEventListener('change', renderEvents);
+      document.getElementById('monthSelect').addEventListener('change', renderEvents);
+      document.getElementById('sortSelect').addEventListener('change', renderEvents);
+
+      document.getElementById('dateInput').addEventListener('change', renderEvents);
+      document.getElementById('startDateInput').addEventListener('change', renderEvents);
+      document.getElementById('endDateInput').addEventListener('change', renderEvents);
+    });
+
+    function setOrganizador(org) {
+      selectedOrganizador = org;
+      document.querySelectorAll('.chip').forEach(btn => {
+        if ((org === '' && btn.innerText === 'Todas') || btn.innerText === org) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      renderEvents();
+    }
+
+    function clearAllFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('categorySelect').value = '';
+      document.getElementById('monthSelect').value = '';
+      document.getElementById('sortSelect').value = 'asc';
+      document.getElementById('dateInput').value = '';
+      document.getElementById('startDateInput').value = '';
+      document.getElementById('endDateInput').value = '';
+      
+      setOrganizador('');
+    }
+
+    function renderEvents() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const category = document.getElementById('categorySelect').value.toLowerCase();
+      const month = document.getElementById('monthSelect').value;
+      const sort = document.getElementById('sortSelect').value;
+
+      const exactDate = document.getElementById('dateInput').value;
+      const startDate = document.getElementById('startDateInput').value;
+      const endDate = document.getElementById('endDateInput').value;
+
+      let filtered = allData.filter(item => {
+        const textMatch = !search || 
+          (item.actividad && item.actividad.toLowerCase().includes(search)) ||
+          (item.lugar && item.lugar.toLowerCase().includes(search));
+
+        const categoryMatch = !category || 
+          (item.categoria && item.categoria.toLowerCase().includes(category));
+
+        const orgMatch = !selectedOrganizador || item.organizador === selectedOrganizador;
+        const monthMatch = !month || (item.fecha && item.fecha.includes(month));
+
+        let dateMatch = true;
+        if (exactDate) {
+          dateMatch = item.fecha === exactDate;
+        } else if (startDate || endDate) {
+          if (startDate && endDate) {
+            dateMatch = item.fecha >= startDate && item.fecha <= endDate;
+          } else if (startDate) {
+            dateMatch = item.fecha >= startDate;
+          } else if (endDate) {
+            dateMatch = item.fecha <= endDate;
+          }
+        }
+
+        return textMatch && categoryMatch && orgMatch && monthMatch && dateMatch;
+      });
+
+      filtered.sort((a, b) => {
+        if (!a.fecha) return 1;
+        if (!b.fecha) return -1;
+        return sort === 'asc' ? a.fecha.localeCompare(b.fecha) : b.fecha.localeCompare(a.fecha);
+      });
+
+      document.getElementById('activityCounter').innerText = `${filtered.length} actividades disponibles`;
+
+      const grid = document.getElementById('eventsGrid');
+      grid.innerHTML = filtered.map(item => `
+        <div class="card">
+          <div>
+            <div class="card-tag">
+              <span>${item.categoria || 'Evento'}</span>
+              <span>${item.organizador}</span>
+            </div>
+            <h3 class="card-title">${item.actividad}</h3>
+            <div class="card-info">📅 ${formatFechaDisplay(item.fecha, item.dia)}</div>
+            <div class="card-info">🕒 ${item.hora || 'Consultar horario'}</div>
+            <div class="card-info">📍 ${item.lugar}</div>
+          </div>
+          <div class="card-footer">
+            <span class="badge-price">${item.precio || 'Consultar'}</span>
+            <a href="${item.url}" target="_blank" rel="noopener" class="btn-link">🔗 Ver evento</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function formatFechaDisplay(fechaStr, diaStr) {
+      if (!fechaStr) return 'Fecha por confirmar';
+      const parts = fechaStr.split('-');
+      if (parts.length < 3) return fechaStr;
+      return `${diaStr ? diaStr + ', ' : ''}${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+  </script>
+</body>
+</html>
