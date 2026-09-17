@@ -13,7 +13,7 @@ URL_TNT = "https://tnt.cat/es/programacio/"
 
 def obtener_eventos_tae():
     eventos = []
-eventos.append({
+    eventos.append({
         "fecha": "2026-10-15",
         "dia": "Dijous",
         "hora": "20h",
