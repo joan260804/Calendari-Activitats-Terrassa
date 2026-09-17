@@ -13,6 +13,17 @@ URL_TNT = "https://tnt.cat/es/programacio/"
 
 def obtener_eventos_tae():
     eventos = []
+eventos.append({
+        "fecha": "2026-10-15",
+        "dia": "Dijous",
+        "hora": "20h",
+        "actividad": "🎭 EVENTO DE PRUEBA: Gran Concierto de Test",
+        "lugar": "Teatre Principal",
+        "categoria": "Música",
+        "precio": "10€",
+        "organizador": "Terrassa Arts Escèniques",
+        "url": "https://terrassaartsesceniques.cat"
+    })
     try:
         resp = requests.get(URL_TAE, headers=HEADERS, timeout=15)
         if resp.status_code != 200:
