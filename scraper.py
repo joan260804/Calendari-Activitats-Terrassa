@@ -11,14 +11,15 @@ URL_TAE = "https://terrassaartsesceniques.cat/programacio/"
 URL_LAFACT = "https://www.lafactcultural.cat/programacio/"
 URL_TNT = "https://tnt.cat/es/programacio/"
 
-def obtener_eventos_tae():
-    eventos = []
+def obtener_eventos_nuevos():
+    eventos_encontrados = []
+    
+    # 1. Extracción en Terrassa Arts Escèniques
     try:
         resp = requests.get(URL_TAE, headers=HEADERS, timeout=15)
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.text, "html.parser")
-            cards = soup.select("article, .esdeveniment, .event-card, .type-tribe_events")
-            for card in cards:
+            for card in soup.select("article, .esdeveniment, .event-card, .type-tribe_events"):
                 title_el = card.select_one(".entry-title, .event-title, h2, h3")
                 link_el = card.select_one("a[href]")
                 date_el = card.select_one(".event-date, .data, time, .tribe-event-date-start")
@@ -34,7 +35,7 @@ def obtener_eventos_tae():
                     precio = price_el.get_text(strip=True) if price_el else "Consultar"
                     categoria = cat_el.get_text(strip=True) if cat_el else "Teatre"
 
-                    eventos.append({
+                    eventos_encontrados.append({
                         "fecha": extraer_fecha_iso(fecha_raw),
                         "dia": extraer_nombre_dia(fecha_raw),
                         "hora": extraer_hora(fecha_raw),
@@ -47,16 +48,13 @@ def obtener_eventos_tae():
                     })
     except Exception as e:
         print(f"[TAE] Error al extraer: {e}")
-    return eventos
 
-def obtener_eventos_lafact():
-    eventos = []
+    # 2. Extracción en LaFACT Cultural
     try:
         resp = requests.get(URL_LAFACT, headers=HEADERS, timeout=15)
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.text, "html.parser")
-            cards = soup.select("article, .card-programacio, .item-programacio, .elementor-post")
-            for card in cards:
+            for card in soup.select("article, .card-programacio, .item-programacio, .elementor-post"):
                 title_el = card.select_one("h2, h3, .title, .entry-title")
                 link_el = card.select_one("a[href]")
                 date_el = card.select_one(".date, .fecha, .data")
@@ -70,7 +68,7 @@ def obtener_eventos_lafact():
                     precio = price_el.get_text(strip=True) if price_el else "Consultar"
                     categoria = cat_el.get_text(strip=True) if cat_el else "Programació LaFACT"
 
-                    eventos.append({
+                    eventos_encontrados.append({
                         "fecha": extraer_fecha_iso(fecha_raw),
                         "dia": extraer_nombre_dia(fecha_raw),
                         "hora": extraer_hora(fecha_raw),
@@ -83,16 +81,13 @@ def obtener_eventos_lafact():
                     })
     except Exception as e:
         print(f"[LaFACT] Error al extraer: {e}")
-    return eventos
 
-def obtener_eventos_tnt():
-    eventos = []
+    # 3. Extracción en Festival TNT
     try:
         resp = requests.get(URL_TNT, headers=HEADERS, timeout=15)
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.text, "html.parser")
-            cards = soup.select("article, .show-card, .espectaculo, .item-tnt")
-            for card in cards:
+            for card in soup.select("article, .show-card, .espectaculo, .item-tnt"):
                 title_el = card.select_one("h2, h3, .title")
                 link_el = card.select_one("a[href]")
                 date_el = card.select_one(".date, .fecha")
@@ -106,7 +101,7 @@ def obtener_eventos_tnt():
                     lugar = place_el.get_text(strip=True) if place_el else "Terrassa"
                     precio = price_el.get_text(strip=True) if price_el else "Consultar"
 
-                    eventos.append({
+                    eventos_encontrados.append({
                         "fecha": extraer_fecha_iso(fecha_raw),
                         "dia": extraer_nombre_dia(fecha_raw),
                         "hora": extraer_hora(fecha_raw),
@@ -119,7 +114,8 @@ def obtener_eventos_tnt():
                     })
     except Exception as e:
         print(f"[TNT] Error al extraer: {e}")
-    return eventos
+
+    return eventos_encontrados
 
 def extraer_fecha_iso(texto):
     match = re.search(r'(\d{4})-(\d{2})-(\d{2})', texto)
@@ -145,30 +141,52 @@ def extraer_hora(texto):
     return "20h"
 
 def actualizar_index():
-    todos_eventos = []
-    todos_eventos.extend(obtener_eventos_tae())
-    todos_eventos.extend(obtener_eventos_lafact())
-    todos_eventos.extend(obtener_eventos_tnt())
-
-    if not todos_eventos:
-        print("No se encontraron nuevos eventos en las webs. No se modifica index.html.")
-        return
-
     with open("index.html", "r", encoding="utf-8") as f:
         html = f.read()
 
-    json_eventos = json.dumps(todos_eventos, ensure_ascii=False, indent=6)
+    # Extraer los eventos actuales existentes en index.html
+    match = re.search(r'const allData = (\[[\s\S]*?\]);', html)
+    if not match:
+        print("No se encontró la variable allData en index.html")
+        return
 
+    try:
+        eventos_actuales = json.loads(match.group(1))
+    except Exception as e:
+        print(f"Error al parsear el JSON existente: {e}")
+        return
+
+    nuevos_eventos = obtener_eventos_nuevos()
+    
+    # Filtrar solo los eventos que no existan previamente (evitar duplicados por URL o título)
+    urls_existentes = {e.get("url") for e in eventos_actuales if "url" in e}
+    titulos_existentes = {e.get("actividad") for e in eventos_actuales if "actividad" in e}
+
+    agregados = 0
+    for ev in nuevos_eventos:
+        if ev.get("url") not in urls_existentes and ev.get("actividad") not in titulos_existentes:
+            eventos_actuales.append(ev)
+            agregados += 1
+
+    if agregados == 0:
+        print("No se encontraron eventos nuevos en las webs. Se mantiene index.html intacto.")
+        return
+
+    # Ordenar cronológicamente
+    eventos_actuales.sort(key=lambda x: x.get("fecha", "9999-99-99"))
+
+    # Reemplazar allData con la lista combinada actualizada
+    json_actualizado = json.dumps(eventos_actuales, ensure_ascii=False, indent=6)
     nuevo_html = re.sub(
         r'const allData = \[[\s\S]*?\];',
-        f'const allData = {json_eventos};',
+        f'const allData = {json_actualizado};',
         html
     )
 
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(nuevo_html)
 
-    print("✅ ¡index.html actualizado correctamente con datos extraídos!")
+    print(f"✅ Se han añadido {agregados} eventos nuevos sin modificar la agenda existente.")
 
 if __name__ == "__main__":
     actualizar_index()
